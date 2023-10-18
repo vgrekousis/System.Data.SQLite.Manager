@@ -140,4 +140,31 @@ namespace System.Data.SQLite.Manager
 			return result.ToString();
 		}
 	}
+
+	[SQLiteFunction(Name = "getdate", FuncType = FunctionType.Scalar)]
+	internal class GetDateFunction : SQLiteFunction
+	{
+		public override object Invoke(object[] args)
+		{
+			return DateTime.Now;
+		}
+	}
+
+	[SQLiteFunction(Name = "getutc", FuncType = FunctionType.Scalar)]
+	internal class GetUTCFunction : SQLiteFunction
+	{
+		public override object Invoke(object[] args)
+		{
+			return DateTime.UtcNow;
+		}
+	}
+
+	[SQLiteFunction(Name = "newid", FuncType = FunctionType.Scalar)]
+	internal class NewIDunction : SQLiteFunction
+	{
+		public override object Invoke(object[] args)
+		{
+			return Guid.NewGuid().ToString();
+		}
+	}
 }

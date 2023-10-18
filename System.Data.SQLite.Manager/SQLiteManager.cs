@@ -122,7 +122,7 @@ namespace System.Data.SQLite.Manager
 	}
 
 	// Custom Concatenate Function
-	[SQLiteFunction(Name = "concat", FuncType = FunctionType.Scalar, Arguments = 2)]
+	[SQLiteFunction(Name = "concat", FuncType = FunctionType.Scalar)]
 	public class ConcatenateFunction : SQLiteFunction
 	{
 		public override object Invoke(object[] args)

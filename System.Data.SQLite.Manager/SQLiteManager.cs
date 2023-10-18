@@ -14,6 +14,9 @@ namespace System.Data.SQLite.Manager
 		{
 			connectionString = $"Data Source={dbFilePath}Version={version};";
 			SQLiteFunction.RegisterFunction(typeof(ConcatenateFunction)); // Register your custom SQLite function
+			SQLiteFunction.RegisterFunction(typeof(GetDateFunction));
+			SQLiteFunction.RegisterFunction(typeof(GetUTCFunction));
+			SQLiteFunction.RegisterFunction(typeof(NewIDFunction));
 		}
 
 		public bool CreateDatabaseFile()
@@ -160,7 +163,7 @@ namespace System.Data.SQLite.Manager
 	}
 
 	[SQLiteFunction(Name = "newid", FuncType = FunctionType.Scalar)]
-	internal class NewIDunction : SQLiteFunction
+	internal class NewIDFunction : SQLiteFunction
 	{
 		public override object Invoke(object[] args)
 		{

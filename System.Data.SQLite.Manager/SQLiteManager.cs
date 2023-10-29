@@ -4,6 +4,7 @@ using System.Data;
 using System.Text;
 using System.Xml.Linq;
 using System.IO;
+using System.Linq;
 
 namespace System.Data.SQLite.Manager
 {
@@ -143,6 +144,51 @@ namespace System.Data.SQLite.Manager
 		{
 			string deleteQuery = $"DELETE FROM {tableName} WHERE {condition};";
 			return ExecuteNonQuery(deleteQuery);
+		}
+
+		public bool AddForeignKeyToTable(string tableName, string columnName, string referencedTableName, string referencedColumnName)
+		{
+			string tempTableName = $"{tableName}_temp";
+
+			// Get the list of existing columns and their types
+			DataTable existingColumns = ExecuteQuery($"PRAGMA table_info({tableName})");
+			var columnInfo = existingColumns.Rows.OfType<DataRow>().Select(row =>
+			{
+				string name = row["name"].ToString();
+				string type = row["type"].ToString();
+				return $"{name} {type}";
+			});
+
+			// Construct the schema for the new table by including existing columns
+			string columnDefinitions = string.Join(", ", columnInfo);
+			string createTableQuery = $"CREATE TABLE IF NOT EXISTS {tempTableName} (" +
+				$"{columnDefinitions}, " +
+				$"FOREIGN KEY ({columnName}) REFERENCES {referencedTableName}({referencedColumnName})" +
+				");";
+
+			// Execute the create table query
+			if (!ExecuteNonQuery(createTableQuery))
+			{
+				return false;
+			}
+
+			// Copy data from the original table to the temporary table
+			string copyDataQuery = $"INSERT INTO {tempTableName} SELECT * FROM {tableName};";
+			if (!ExecuteNonQuery(copyDataQuery))
+			{
+				return false;
+			}
+
+			// Delete the original table
+			string deleteTableQuery = $"DROP TABLE IF EXISTS {tableName};";
+			if (!ExecuteNonQuery(deleteTableQuery))
+			{
+				return false;
+			}
+
+			// Rename the temporary table to the original table name
+			string renameTableQuery = $"ALTER TABLE {tempTableName} RENAME TO {tableName};";
+			return ExecuteNonQuery(renameTableQuery);
 		}
 	}
 

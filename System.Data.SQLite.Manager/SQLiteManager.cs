@@ -148,6 +148,14 @@ namespace System.Data.SQLite.Manager
 
 		public bool AddForeignKeyToTable(string tableName, string columnName, string referencedTableName, string referencedColumnName)
 		{
+			// Check if the referenced column exists in the referenced table
+			bool referencedColumnExists = CheckColumnExists(referencedTableName, referencedColumnName);
+			if (!referencedColumnExists)
+			{
+				Console.WriteLine("Referenced column does not exist.");
+				return false;
+			}
+
 			string tempTableName = $"{tableName}_temp";
 
 			// Get the list of existing columns and their types
@@ -190,6 +198,24 @@ namespace System.Data.SQLite.Manager
 			string renameTableQuery = $"ALTER TABLE {tempTableName} RENAME TO {tableName};";
 			return ExecuteNonQuery(renameTableQuery);
 		}
+
+		private bool CheckColumnExists(string tableName, string columnName)
+		{
+			string query = $"PRAGMA table_info({tableName})";
+			DataTable result = ExecuteQuery(query);
+
+			foreach (DataRow row in result.Rows)
+			{
+				string existingColumnName = row["name"].ToString();
+				if (existingColumnName.Equals(columnName, StringComparison.OrdinalIgnoreCase))
+				{
+					return true; // The column exists
+				}
+			}
+
+			return false; // The column does not exist
+		}
+
 	}
 
 	// Custom Concatenate Function

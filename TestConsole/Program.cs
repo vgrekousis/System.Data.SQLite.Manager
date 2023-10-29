@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using System.Data.SQLite.Manager;
 using System.Linq;
 using System.Text;
@@ -16,7 +17,10 @@ namespace TestConsole
 			Console.WriteLine("Table Created/Exists: {0}", manager.CreateTable("MyTable", "ID INT PrimaryKey"));
 			Console.WriteLine("Table Created/Exists: {0}", manager.CreateTable("MyTable2", "ID INT PrimaryKey, ForeignID INT"));
 			Console.WriteLine("Relationship created: {0}", manager.AddForeignKeyToTable("MyTable2", "ForeignID", "MyTable", "ID"));
-			Console.WriteLine("Drop table query succesfull: {0}", manager.DropTable("MyTable"));
+			//Console.WriteLine("Drop table query succesfull: {0}", manager.DropTable("MyTable"));
+
+			foreach (var col in manager.Select("MyTable", "*").Columns)
+				Console.WriteLine(col.ToString());
 		}
 	}
 }

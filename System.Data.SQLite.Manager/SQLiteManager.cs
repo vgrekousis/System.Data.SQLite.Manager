@@ -121,6 +121,12 @@ namespace System.Data.SQLite.Manager
 			return ExecuteNonQuery(createTableQuery);
 		}
 
+		public bool DropTable(string tableName)
+		{
+			string dropTableQuery = $"DROP TABLE IF EXISTS {tableName}";
+			return ExecuteNonQuery(dropTableQuery);
+		}
+
 		public bool Insert(string tableName, string columns, string values)
 		{
 			string insertQuery = $"INSERT INTO {tableName} ({columns}) VALUES ({values});";

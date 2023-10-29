@@ -5,6 +5,7 @@ using System.Text;
 using System.Xml.Linq;
 using System.IO;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace System.Data.SQLite.Manager
 {
@@ -146,14 +147,47 @@ namespace System.Data.SQLite.Manager
 			return ExecuteNonQuery(deleteQuery);
 		}
 
+		public List<string> GetForeignKeyColumnNames(string tableName)
+		{
+			if (!TableExists(tableName))
+				throw new SQLiteException(SQLiteErrorCode.Error, $"unknown table \"{tableName}\"");
+
+			List<string> foreignKeyColumns = new List<string>();
+
+			// Get the list of foreign key columns in the specified table
+			string query = $"PRAGMA foreign_key_list({tableName})";
+			DataTable result = ExecuteQuery(query);
+
+			foreach (DataRow row in result.Rows)
+			{
+				string columnName = row["from"].ToString();
+				foreignKeyColumns.Add(columnName);
+			}
+
+			return foreignKeyColumns;
+		}
+
 		public bool AddForeignKeyToTable(string tableName, string columnName, string referencedTableName, string referencedColumnName)
 		{
+			// Check if the source table exists
+			bool sourceTableExists = TableExists(tableName);
+			if (!sourceTableExists)
+			{
+				throw new SQLiteException(SQLiteErrorCode.Error, $"unknown table {tableName}");
+			}
+
+			// Check if the referenced table exists
+			bool referencedTableExists = TableExists(referencedTableName);
+			if (!referencedTableExists)
+			{
+				throw new SQLiteException(SQLiteErrorCode.Error, $"unknown table {referencedTableName}");
+			}
+
 			// Check if the referenced column exists in the referenced table
 			bool referencedColumnExists = CheckColumnExists(referencedTableName, referencedColumnName);
 			if (!referencedColumnExists)
 			{
-				Console.WriteLine("Referenced column does not exist.");
-				return false;
+				throw new SQLiteException(SQLiteErrorCode.Error, $"unknown referenced column name {referencedColumnName} for table {referencedTableName}");
 			}
 
 			string tempTableName = $"{tableName}_temp";
@@ -199,8 +233,15 @@ namespace System.Data.SQLite.Manager
 			return ExecuteNonQuery(renameTableQuery);
 		}
 
-		private bool CheckColumnExists(string tableName, string columnName)
+		private bool TableExists(string tableName)
 		{
+			string query = $"SELECT name FROM sqlite_master WHERE type='table' AND name='{tableName}'";
+			DataTable result = ExecuteQuery(query);
+			return result.Rows.Count > 0;
+		}
+
+		private bool CheckColumnExists(string tableName, string columnName)
+		{ 
 			string query = $"PRAGMA table_info({tableName})";
 			DataTable result = ExecuteQuery(query);
 

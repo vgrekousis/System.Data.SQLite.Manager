@@ -16,10 +16,10 @@ namespace TestConsole
 			Console.WriteLine("Database Created/Exists: {0}", manager.CreateDatabaseFile());
 			Console.WriteLine("Table Created/Exists: {0}", manager.CreateTable("MyTable", "ID INT PrimaryKey"));
 			Console.WriteLine("Table Created/Exists: {0}", manager.CreateTable("MyTable2", "ID INT PrimaryKey, ForeignID INT"));
-			Console.WriteLine("Relationship created: {0}", manager.AddForeignKeyToTable("MyTable2", "ForeignID", "MyTable", "ID"));
+			Console.WriteLine("Relationship created: {0}", manager.AddForeignKeyToTable("MyTable2", "ForeignID", "MyTable", "IDs"));
 			//Console.WriteLine("Drop table query succesfull: {0}", manager.DropTable("MyTable"));
 
-			foreach (var col in manager.Select("MyTable", "*").Columns)
+			foreach (var col in manager.GetForeignKeyColumnNames("MyTable2"))
 				Console.WriteLine(col.ToString());
 		}
 	}

@@ -3,16 +3,20 @@ using System;
 using System.Data;
 using System.Text;
 using System.Xml.Linq;
+using System.IO;
 
 namespace System.Data.SQLite.Manager
 {
 	public class SQLiteManager
 	{
-		private string connectionString;
+		private string _connectionString;
+		private string _dbFilePath;
+		private bool _dbFileCreated;
 
 		public SQLiteManager(string dbFilePath, string version = "3")
 		{
-			connectionString = $"Data Source={dbFilePath}Version={version};";
+			_connectionString = $"Data Source={dbFilePath}Version={version};";
+			_dbFilePath = dbFilePath ;
 			SQLiteFunction.RegisterFunction(typeof(ConcatenateFunction)); // Register your custom SQLite function
 			SQLiteFunction.RegisterFunction(typeof(GetDateFunction));
 			SQLiteFunction.RegisterFunction(typeof(GetUTCFunction));
@@ -21,26 +25,38 @@ namespace System.Data.SQLite.Manager
 
 		public bool CreateDatabaseFile()
 		{
-			try
+			if (!File.Exists(_dbFilePath))
 			{
-				using (SQLiteConnection connection = new SQLiteConnection(connectionString))
+				try
 				{
-					connection.Open();
-					return true;
+					SQLiteConnection.CreateFile(_dbFilePath);
+					using (SQLiteConnection connection = new SQLiteConnection(_connectionString))
+					{
+						connection.Open();
+						_dbFileCreated = true;
+						return true;
+					}
+				}
+				catch (Exception ex)
+				{
+					_dbFileCreated = false;
+					Console.WriteLine($"SQLite Error: {ex.Message}");
+					return false;
 				}
 			}
-			catch (Exception ex)
+			else
 			{
-				Console.WriteLine($"SQLite Error: {ex.Message}");
-				return false;
+				Console.WriteLine("Database file already exists.");
+				return _dbFileCreated = true;
 			}
 		}
+
 
 		public bool ExecuteNonQuery(string query)
 		{
 			try
 			{
-				using (SQLiteConnection connection = new SQLiteConnection(connectionString))
+				using (SQLiteConnection connection = new SQLiteConnection(_connectionString))
 				{
 					connection.Open();
 					using (SQLiteCommand cmd = new SQLiteCommand(query, connection))
@@ -61,7 +77,7 @@ namespace System.Data.SQLite.Manager
 		{
 			try
 			{
-				using (SQLiteConnection connection = new SQLiteConnection(connectionString))
+				using (SQLiteConnection connection = new SQLiteConnection(_connectionString))
 				{
 					connection.Open();
 					using (SQLiteCommand cmd = new SQLiteCommand(query, connection))

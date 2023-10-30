@@ -218,11 +218,7 @@ namespace System.Data.SQLite.Manager
 			string tempTableName = $"{tableName}_temp";
 
 			DataTable existingColumns = ExecuteQuery($"PRAGMA table_info({tableName})");
-			var autoIncrementColumns = existingColumns.Rows
-	.OfType<DataRow>()
-	.Where(row => row["name"].ToString().IndexOf("AUTOINCREMENT", StringComparison.OrdinalIgnoreCase) >= 0)
-	.Select(row => row["name"].ToString())
-	.ToList();
+			
 
 			var columnInfo = existingColumns.Rows.OfType<DataRow>().Select(row =>
 			{
@@ -231,10 +227,8 @@ namespace System.Data.SQLite.Manager
 				Console.WriteLine(type);
 				string notNull = !ColumnAcceptsNull(tableName, name) ? " NOT NULL" : string.Empty;
 				string isPrimaryKey = Convert.ToInt32(row["pk"]) == 1 ? " PRIMARY KEY" : string.Empty;
-				string autoIncrement = autoIncrementColumns.Contains(name) ? " AUTOINCREMENT" : string.Empty;
-				//Console.WriteLine(isPrimaryKey);
 
-				return $"{name} {type}{notNull}{isPrimaryKey}{autoIncrement}";
+				return $"{name} {type}{notNull}{isPrimaryKey}";
 			});
 
 			// Construct the schema for the new table by including existing columns

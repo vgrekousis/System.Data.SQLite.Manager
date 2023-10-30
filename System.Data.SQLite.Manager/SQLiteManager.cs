@@ -217,14 +217,24 @@ namespace System.Data.SQLite.Manager
 
 			string tempTableName = $"{tableName}_temp";
 
-			// Get the list of existing columns and their types
 			DataTable existingColumns = ExecuteQuery($"PRAGMA table_info({tableName})");
+			var autoIncrementColumns = existingColumns.Rows
+	.OfType<DataRow>()
+	.Where(row => row["name"].ToString().IndexOf("AUTOINCREMENT", StringComparison.OrdinalIgnoreCase) >= 0)
+	.Select(row => row["name"].ToString())
+	.ToList();
+
 			var columnInfo = existingColumns.Rows.OfType<DataRow>().Select(row =>
 			{
 				string name = row["name"].ToString();
 				string type = row["type"].ToString();
+				Console.WriteLine(type);
 				string notNull = !ColumnAcceptsNull(tableName, name) ? " NOT NULL" : string.Empty;
-				return $"{name} {type}{notNull}";
+				string isPrimaryKey = Convert.ToInt32(row["pk"]) == 1 ? " PRIMARY KEY" : string.Empty;
+				string autoIncrement = autoIncrementColumns.Contains(name) ? " AUTOINCREMENT" : string.Empty;
+				//Console.WriteLine(isPrimaryKey);
+
+				return $"{name} {type}{notNull}{isPrimaryKey}{autoIncrement}";
 			});
 
 			// Construct the schema for the new table by including existing columns
@@ -239,6 +249,8 @@ namespace System.Data.SQLite.Manager
 			{
 				return false;
 			}
+
+			Console.WriteLine(createTableQuery);
 
 			// Copy data from the original table to the temporary table
 			string copyDataQuery = $"INSERT INTO {tempTableName} SELECT * FROM {tableName};";

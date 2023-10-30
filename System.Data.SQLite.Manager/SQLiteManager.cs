@@ -169,7 +169,7 @@ namespace System.Data.SQLite.Manager
 
 		public bool ColumnAcceptsNull(string tableName, string columnName)
 		{
-			if (!TableExists(tableName) || !CheckColumnExists(tableName, columnName))
+			if (!TableExists(tableName) || !ColumnExists(tableName, columnName))
 				throw (new SQLiteException(SQLiteErrorCode.Error, $"unknown table or column \"{tableName}.{columnName}\""));
 			
 
@@ -209,7 +209,7 @@ namespace System.Data.SQLite.Manager
 			}
 
 			// Check if the referenced column exists in the referenced table
-			bool referencedColumnExists = CheckColumnExists(referencedTableName, referencedColumnName);
+			bool referencedColumnExists = ColumnExists(referencedTableName, referencedColumnName);
 			if (!referencedColumnExists)
 			{
 				throw new SQLiteException(SQLiteErrorCode.Error, $"unknown referenced column name {referencedColumnName} for table {referencedTableName}");
@@ -266,7 +266,7 @@ namespace System.Data.SQLite.Manager
 			return result.Rows.Count > 0;
 		}
 
-		private bool CheckColumnExists(string tableName, string columnName)
+		private bool ColumnExists(string tableName, string columnName)
 		{ 
 			string query = $"PRAGMA table_info({tableName})";
 			DataTable result = ExecuteQuery(query);

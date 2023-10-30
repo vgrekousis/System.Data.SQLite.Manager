@@ -17,11 +17,11 @@ namespace TestConsole
 			Console.WriteLine("Drop table query succesfull: {0}", manager.DropTable("MyTable2"));
 
 			Console.WriteLine("Database Created/Exists: {0}", manager.CreateDatabaseFile());
-			Console.WriteLine("Table Created/Exists: {0}", manager.CreateTable("MyTable", "ID INT PrimaryKey, Descr TEXT NOT NULL"));
-			Console.WriteLine("Table Created/Exists: {0}", manager.CreateTable("MyTable2", "ID INT PrimaryKey, ForeignID INT, Descr TEXT NOT NULL"));
+			Console.WriteLine("Table Created/Exists: {0}", manager.CreateTable("MyTable", "ID INT PrimaryKey, Descr TEXT"));
+			Console.WriteLine("Table Created/Exists: {0}", manager.CreateTable("MyTable2", "ID INT PrimaryKey, ForeignID INT NOT NULL, Descr TEXT NOT NULL"));
 			Console.WriteLine("Relationship created: {0}", manager.AddForeignKeyToTable("MyTable2", "ForeignID", "MyTable", "ID"));
 
-			Console.WriteLine(manager.ColumnAcceptsNull("MyTable", "Descr"));
+			Console.WriteLine(manager.ColumnAcceptsNull("MyTable2", "ForeignID"));
 		
 
 			foreach (var col in manager.GetForeignKeyColumnNames("MyTable2"))

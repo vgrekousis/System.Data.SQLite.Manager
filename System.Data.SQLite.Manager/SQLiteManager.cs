@@ -169,18 +169,27 @@ namespace System.Data.SQLite.Manager
 
 		public bool ColumnAcceptsNull(string tableName, string columnName)
 		{
+			if (!TableExists(tableName) || !CheckColumnExists(tableName, columnName))
+				throw (new SQLiteException(SQLiteErrorCode.Error, $"unknown table or column \"{tableName}.{columnName}\""));
+			
+
 			string query = $"PRAGMA table_info({tableName})";
 			DataTable result = ExecuteQuery(query);
-		
+
 			foreach (DataRow row in result.Rows)
 			{
 				string name = row["name"].ToString();
 				string notnull = row["notnull"].ToString();
-				return name.Equals(columnName) && notnull.Equals("0");
+
+				if (name == columnName && notnull == "0")
+				{
+					// The column allows NULL values
+					return true;
+				}
 			}
 
 			// The column does not exist or is defined as NOT NULL
-			throw (new SQLiteException(SQLiteErrorCode.Error, $"unknown table or column \"{tableName}.{columnName}\""));
+			return false;
 		}
 
 		public bool AddForeignKeyToTable(string tableName, string columnName, string referencedTableName, string referencedColumnName)

@@ -43,11 +43,12 @@ namespace TestConsole
 
 
 			Console.WriteLine("\nAES Encryption");
-			Console.WriteLine($"KEY: {AesEncryption.FromBytes(AesEncryption.GenerateKey())}");
-			Console.WriteLine($"IV: {AesEncryption.FromBytes(AesEncryption.GenerateIV())}");
-			string encrypted = AesEncryption.Encrypt("Hello World");
+			AesEncryption aes = new AesEncryption();
+			Console.WriteLine($"KEY: {aes.FromBytes(aes.GenerateKey())}");
+			Console.WriteLine($"IV: {aes.FromBytes(aes.GenerateIV())}");
+			string encrypted = aes.Encrypt("Hello World");
 			Console.WriteLine(encrypted);
-			Console.WriteLine(AesEncryption.Decrypt(encrypted));
+			Console.WriteLine(aes.Decrypt(encrypted));
 
 
 		}

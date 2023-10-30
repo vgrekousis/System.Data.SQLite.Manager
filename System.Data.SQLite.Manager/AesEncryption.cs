@@ -15,14 +15,14 @@ namespace System.Data.SQLite.Manager
 
 	public class AesEncryption
 	{
-		private static byte[] s_key = Encoding.UTF8.GetBytes("key+");
-		private static byte[] s_iv = Encoding.UTF8.GetBytes("key+");
+		private static byte[] _key;
+		private static byte[] _iv;
 
-		public static string FromBytes(byte[] bytes)
+		public string FromBytes(byte[] bytes)
 		{
 			return System.Text.Encoding.ASCII.GetString(bytes);
 		}
-		public static byte[] GenerateIV()
+		public byte[] GenerateIV()
 		{
 			byte[] iv;
 			using (Aes aes = Aes.Create())
@@ -30,10 +30,10 @@ namespace System.Data.SQLite.Manager
 				aes.GenerateIV();
 				iv = aes.IV;
 			}
-			return s_iv = iv;
+			return _iv = iv;
 		}
 
-		public static byte[] GenerateKey()
+		public byte[] GenerateKey()
 		{
 			byte[] key;
 			using (Aes aes = Aes.Create())
@@ -41,15 +41,15 @@ namespace System.Data.SQLite.Manager
 				aes.GenerateKey();
 				key = aes.Key;
 			}
-			return s_key = key;
+			return _key = key;
 		}
 
-		public static string Encrypt(string plainText)
+		public string Encrypt(string plainText)
 		{
 			using (Aes aes = Aes.Create())
 			{
-				aes.Key = s_key;
-				aes.IV = s_iv;
+				aes.Key = _key;
+				aes.IV = _iv;
 
 				ICryptoTransform encryptor = aes.CreateEncryptor(aes.Key, aes.IV);
 
@@ -67,15 +67,15 @@ namespace System.Data.SQLite.Manager
 			}
 		}
 
-		public static string Decrypt(string cipherText)
+		public string Decrypt(string cipherText)
 		{
 			cipherText = cipherText.Replace(" ", "+");
 			byte[] cipherBytes = Convert.FromBase64String(cipherText);
 
 			using (Aes aes = Aes.Create())
 			{
-				aes.Key = s_key;
-				aes.IV = s_iv;
+				aes.Key = _key;
+				aes.IV = _iv;
 
 				ICryptoTransform decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
 

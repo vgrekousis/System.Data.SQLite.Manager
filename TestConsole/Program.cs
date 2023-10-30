@@ -13,11 +13,16 @@ namespace TestConsole
 		static void Main(string[] args)
 		{
 			SQLiteManager manager = new SQLiteManager("mytestdb");
+			Console.WriteLine("Drop table query succesfull: {0}", manager.DropTable("MyTable"));
+			Console.WriteLine("Drop table query succesfull: {0}", manager.DropTable("MyTable2"));
+
 			Console.WriteLine("Database Created/Exists: {0}", manager.CreateDatabaseFile());
-			Console.WriteLine("Table Created/Exists: {0}", manager.CreateTable("MyTable", "ID INT PrimaryKey"));
-			Console.WriteLine("Table Created/Exists: {0}", manager.CreateTable("MyTable2", "ID INT PrimaryKey, ForeignID INT"));
-			Console.WriteLine("Relationship created: {0}", manager.AddForeignKeyToTable("MyTable2", "ForeignID", "MyTable", "IDs"));
-			//Console.WriteLine("Drop table query succesfull: {0}", manager.DropTable("MyTable"));
+			Console.WriteLine("Table Created/Exists: {0}", manager.CreateTable("MyTable", "ID INT PrimaryKey, Descr TEXT NOT NULL"));
+			Console.WriteLine("Table Created/Exists: {0}", manager.CreateTable("MyTable2", "ID INT PrimaryKey, ForeignID INT, Descr TEXT NOT NULL"));
+			Console.WriteLine("Relationship created: {0}", manager.AddForeignKeyToTable("MyTable2", "ForeignID", "MyTable", "ID"));
+
+			Console.WriteLine(manager.ColumnAcceptsNull("MyTable", "Descr"));
+		
 
 			foreach (var col in manager.GetForeignKeyColumnNames("MyTable2"))
 				Console.WriteLine(col.ToString());

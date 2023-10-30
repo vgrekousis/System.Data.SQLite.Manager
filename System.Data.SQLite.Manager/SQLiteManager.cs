@@ -167,6 +167,22 @@ namespace System.Data.SQLite.Manager
 			return foreignKeyColumns;
 		}
 
+		public bool ColumnAcceptsNull(string tableName, string columnName)
+		{
+			string query = $"PRAGMA table_info({tableName})";
+			DataTable result = ExecuteQuery(query);
+		
+			foreach (DataRow row in result.Rows)
+			{
+				string name = row["name"].ToString();
+				string notnull = row["notnull"].ToString();
+				return name.Equals(columnName) && notnull.Equals("0");
+			}
+
+			// The column does not exist or is defined as NOT NULL
+			throw (new SQLiteException(SQLiteErrorCode.Error, $"unknown table or column \"{tableName}.{columnName}\""));
+		}
+
 		public bool AddForeignKeyToTable(string tableName, string columnName, string referencedTableName, string referencedColumnName)
 		{
 			// Check if the source table exists
@@ -198,7 +214,8 @@ namespace System.Data.SQLite.Manager
 			{
 				string name = row["name"].ToString();
 				string type = row["type"].ToString();
-				return $"{name} {type}";
+				string notNull = !ColumnAcceptsNull(tableName, name) ? " NOT NULL" : string.Empty;
+				return $"{name} {type}{notNull}";
 			});
 
 			// Construct the schema for the new table by including existing columns
